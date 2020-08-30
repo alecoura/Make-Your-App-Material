@@ -9,4 +9,6 @@
 
     <string name="up">Up</string>
 
+    <string name="fab_submit">Submit</string>
+
 </resources>
