@@ -26,15 +26,13 @@
 
         <TextView
             android:id="@+id/article_title"
+            android:textStyle="bold"
             style="@style/TextAppearance.AppCompat.Subhead"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="2"
             android:paddingStart="@dimen/card_start_padding"
             android:paddingTop="@dimen/card_title_top_padding"
             android:paddingEnd="@dimen/card_title_end_padding"
-            android:textAppearance="?attr/textAppearanceHeadline6"
             tools:text="Article Title" />
 
         <TextView
