@@ -1,6 +1,7 @@
 package com.example.xyzreader.ui;
 
 
+import android.app.ActivityOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,15 +13,18 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -53,7 +57,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     // Use default locale format
     private SimpleDateFormat outputFormat = new SimpleDateFormat();
     // Most time functions can only handle 1902 - 2037
-    private GregorianCalendar START_OF_EPOCH = new GregorianCalendar(2,1,1);
+    private GregorianCalendar START_OF_EPOCH = new GregorianCalendar(2, 1, 1);
 
     private Adapter adapter;
 
@@ -63,20 +67,22 @@ public class ArticleListActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_article_list);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-
-        final View toolbarContainerView = findViewById(R.id.toolbar_container);
-
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
-
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
-        adapter = new Adapter(null);
-        adapter.setHasStableIds(true);
-        mRecyclerView.setAdapter(adapter);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         int columnCount = getResources().getInteger(R.integer.list_column_count);
         StaggeredGridLayoutManager sglm =
                 new StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL);
+
+        adapter = new Adapter(null);
+        adapter.setHasStableIds(true);
+
         mRecyclerView.setLayoutManager(sglm);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setAdapter(adapter);
 
         LoaderManager.getInstance(this).initLoader(0, null, this);
 
@@ -154,8 +160,8 @@ public class ArticleListActivity extends AppCompatActivity implements
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()))));
+                    startActivity(new Intent(Intent.ACTION_VIEW, ItemsContract
+                            .Items.buildItemUri(getItemId(vh.getAdapterPosition()))));
                 }
             });
             return vh;
@@ -189,8 +195,8 @@ public class ArticleListActivity extends AppCompatActivity implements
             } else {
                 holder.subtitleView.setText(Html.fromHtml(
                         outputFormat.format(publishedDate)
-                        + "<br/>" + " by "
-                        + mCursor.getString(ArticleLoader.Query.AUTHOR)));
+                                + "<br/>" + " by "
+                                + mCursor.getString(ArticleLoader.Query.AUTHOR)));
             }
             holder.thumbnailView.setImageUrl(
                     mCursor.getString(ArticleLoader.Query.THUMB_URL),
@@ -245,7 +251,7 @@ public class ArticleListActivity extends AppCompatActivity implements
 
         @Override
         public int getNewListSize() {
-            return newCursor == null? 0 : newCursor.getCount();
+            return newCursor == null ? 0 : newCursor.getCount();
         }
 
         @Override
@@ -264,6 +270,7 @@ public class ArticleListActivity extends AppCompatActivity implements
             moveCursorsToPosition(oldItemPosition, newItemPosition);
             return getChangePayload(newCursor, oldCursor);
         }
+
         @Nullable
         public Object getChangePayload(C newCursor, C oldCursor) {
             return null;
@@ -274,8 +281,10 @@ public class ArticleListActivity extends AppCompatActivity implements
             boolean oldMoved = oldCursor.moveToPosition(oldItemPosition);
             return newMoved && oldMoved;
         }
-        /** Cursors are already moved to positions where you should obtain data by row.
-         *  Checks if contents at row are same
+
+        /**
+         * Cursors are already moved to positions where you should obtain data by row.
+         * Checks if contents at row are same
          *
          * @param oldCursor Old cursor object
          * @param newCursor New cursor object
@@ -283,8 +292,10 @@ public class ArticleListActivity extends AppCompatActivity implements
          */
         public abstract boolean areRowContentsTheSame(Cursor oldCursor, Cursor newCursor);
 
-        /** Cursors are already moved to positions where you should obtain data from row
-         *  Checks if rows are the same, ideally, check by unique id
+        /**
+         * Cursors are already moved to positions where you should obtain data from row
+         * Checks if rows are the same, ideally, check by unique id
+         *
          * @param oldCursor Old cursor object
          * @param newCursor New cursor object
          * @return See DiffUtil

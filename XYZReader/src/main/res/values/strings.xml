@@ -11,4 +11,6 @@
 
     <string name="fab_submit">Submit</string>
 
+    <string name="transition_image">transition_image</string>
+
 </resources>
